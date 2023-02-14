@@ -21,13 +21,14 @@ namespace SnakeGame {
         // Allows the snake to  pass through walls
         private bool WalkingThroughWallsIsEnabled = true;
 
-        // https://www.fileformat.info/info/unicode/char/25a0/index.htm
         // The charachter for the gift, this is a black box
+        // https://www.fileformat.info/info/unicode/char/25a0/index.htm
         private string GiftCode = "\u25A0";
 
         public SnakeGame() {
             InitializeComponent();
         }
+
 
         // Initialize the UI
         private void SnakeGame_Load(object sender, EventArgs e) {
@@ -47,6 +48,7 @@ namespace SnakeGame {
             UpdateStartPosition();
 
         }
+
 
         // This will start the game
         private void StartGameButton_Click(object sender, EventArgs e) {
@@ -96,6 +98,7 @@ namespace SnakeGame {
             TimerBox.Start();
         }
 
+
         // When a collision is detected
         private void Snake_OnCollision(object? sender, EventArgs e) {
             TimerBox.Stop();
@@ -134,6 +137,7 @@ namespace SnakeGame {
             UpdateStartPosition();
         }
 
+
         // When the snaked has moved
         private void Snake_OnPositionChanged(object? sender, SnakePositionChangedArgs e) {
             int Y = e.PositionToAdd.Y;
@@ -154,6 +158,7 @@ namespace SnakeGame {
                 e.PositionToDelete.State = CoordinateState.Unoccupied;
             }
         }
+
 
         // This will get the snake moving
         private void TimerBox_Tick(object sender, EventArgs e) {
@@ -224,6 +229,7 @@ namespace SnakeGame {
             }
         }
 
+
         // This will capture user input
         private void SnakeGame_KeyDown(object sender, KeyEventArgs e) {
             switch (e.KeyCode) {
@@ -242,6 +248,7 @@ namespace SnakeGame {
             }
         }
 
+
         // This gets called each time we change the amount of vertical cells
         private void OnYHeightChanged(object sender, EventArgs e) {
             // Here we grab the new updated value,
@@ -253,6 +260,7 @@ namespace SnakeGame {
             GameGrid.RowCount = NewRowCount;
             UpdateRowHeight();
         }
+
 
         // This gets called each time we change the amount of horizontal cells
         private void OnXLengthChanged(object sender, EventArgs e) {
@@ -267,21 +275,56 @@ namespace SnakeGame {
         }
 
 
+        // This gets called when the checkmark about allowing walking through walls changes
+        private void WallhackCheckbox_CheckedChanged(object sender, EventArgs e) {
+            WalkingThroughWallsIsEnabled = WallhackCheckbox.Checked;
+        }
+
+
+        // We change the interval  on our timer, remember it is in ms.
+        private void DifficultySelection_SelectedIndexChanged(object sender, EventArgs e) {
+            switch (DifficultySelection.SelectedIndex) {
+                case 0: // super let
+                    TimerBox.Interval = 185;
+                    break;
+                case 1: // let
+                    TimerBox.Interval = 135;
+                    break;
+                case 2: // Normal
+                    TimerBox.Interval = 85;
+                    break;
+                case 3: // Svær
+                    TimerBox.Interval = 55;
+                    break;
+                case 4: // Ekspert
+                    TimerBox.Interval = 40;
+                    break;
+            }
+        }
+
+        // When we want to change the color of our snake
+        private void ChangeSnakeColorButton_Click(object sender, EventArgs e) {
+            // We call ShowDialog, and if it return DialogResult.OK means that a selection has occured
+            if (colorDialog.ShowDialog() == DialogResult.OK) {
+                // We update the cellstyle to include the new color selected
+                GameGrid.DefaultCellStyle.SelectionBackColor = colorDialog.Color;
+            }
+        }
+
         // Will spawn a gift somewhere
         private void SpawnGift() {
-            // We select all fields not occupied by snake
+            // We select all fields not occupied
             var emptyCells = from Coordinate cord in PlayingField
                              where cord.State == CoordinateState.Unoccupied
                              select cord;
 
-            // We get a random entry
+            // We get a random number
             int randomNumber = new Random().Next(0, emptyCells.Count());
-            
-            SpawnGiftInCell(emptyCells.ElementAt(randomNumber));
-        }
 
+            // We select a random coordinate
+            Coordinate coordinate = emptyCells.ElementAt(randomNumber);
 
-        private void SpawnGiftInCell(Coordinate coordinate) {
+            // We update the cell to show the gift, and mark the field occupied 
             GameGrid.Rows[coordinate.Y].Cells[coordinate.X].Value = GiftCode;
             coordinate.State = CoordinateState.OccupiedByGift;
         }
@@ -336,40 +379,6 @@ namespace SnakeGame {
             int xcenter = Center.Item1;
             int ycenter = Center.Item2;
             GameGrid.Rows[xcenter].Cells[ycenter].Selected = true;
-        }
-
-        private void WallhackCheckbox_CheckedChanged(object sender, EventArgs e) {
-            WalkingThroughWallsIsEnabled = WallhackCheckbox.Checked;
-        }
-
-        // We change the interval  on our timer, remember it is in ms.
-        private void DifficultySelection_SelectedIndexChanged(object sender, EventArgs e) {
-            switch (DifficultySelection.SelectedIndex) {
-                case 0: // super let
-                    TimerBox.Interval = 200;
-                    break;
-                case 1: // let
-                    TimerBox.Interval = 150;
-                    break;
-                case 2: // Normal
-                    TimerBox.Interval = 100;
-                    break;
-                case 3: // Svær
-                    TimerBox.Interval = 75;
-                    break;
-                case 4: // Ekspert
-                    TimerBox.Interval = 50;
-                    break;
-            }
-        }
-
-        // When we want to change the color of our snake
-        private void ChangeSnakeColorButton_Click(object sender, EventArgs e) {
-            // We call ShowDialog, and if it return DialogResult.OK means that a selection has occured
-            if (colorDialog.ShowDialog() == DialogResult.OK) {
-                // We update the cellstyle to include the new color selected
-                GameGrid.DefaultCellStyle.SelectionBackColor = colorDialog.Color;
-            }
         }
     }
 }
